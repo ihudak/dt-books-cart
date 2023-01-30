@@ -8,6 +8,7 @@ import com.dynatrace.cart.model.Client;
 import com.dynatrace.cart.repository.BookRepository;
 import com.dynatrace.cart.repository.CartRepository;
 import com.dynatrace.cart.repository.ClientRepository;
+import com.dynatrace.cart.repository.ConfigRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,25 +20,28 @@ import java.util.Optional;
 
 
 @RestController
-@RequestMapping("/api/v1/")
-public class CartController {
+@RequestMapping("/api/v1/carts")
+public class CartController extends HardworkingController {
     @Autowired
     private CartRepository cartRepository;
     @Autowired
     private ClientRepository clientRepository;
     @Autowired
     private BookRepository bookRepository;
+    @Autowired
+    ConfigRepository configRepository;
     Logger logger = LoggerFactory.getLogger(CartController.class);
 
     // get all Carts
-    @GetMapping("/carts")
+    @GetMapping("")
     public List<Cart> getAllCarts() {
         return cartRepository.findAll(Sort.by(Sort.Direction.ASC, "email"));
     }
 
     // get Cart by ID
-    @GetMapping("/carts/{id}")
+    @GetMapping("/{id}")
     public Cart getCartById(@PathVariable Long id) {
+        simulateCrash();
         Optional<Cart> cart = cartRepository.findById(id);
         if (cart.isEmpty()) {
             throw new ResourceNotFoundException("Cart not found");
@@ -46,22 +50,26 @@ public class CartController {
     }
 
     // get Cart of a user
-    @GetMapping("/carts/findByEmail")
+    @GetMapping("/findByEmail")
     public List<Cart> getCartsByEmail(@RequestParam String email) {
+        simulateCrash();
         this.verifyClient(email);
         return cartRepository.findByEmail(email);
     }
 
     // get all users who have the book in their cart
-    @GetMapping("/carts/findByISBN")
+    @GetMapping("/findByISBN")
     public List<Cart> getCartsByISBN(@RequestParam String isbn) {
+        simulateCrash();
         this.verifyBook(isbn);
         return cartRepository.findByEmail(isbn);
     }
 
     // add a book to the cart
-    @PostMapping("/carts")
+    @PostMapping("")
     public Cart addToCart(@RequestBody Cart cart) {
+        simulateHardWork();
+        simulateCrash();
         this.verifyClient(cart.getEmail());
         this.verifyBook(cart.getIsbn());
         Cart cartDB = cartRepository.findByEmailAndIsbn(cart.getEmail(), cart.getIsbn());
@@ -71,12 +79,15 @@ public class CartController {
         // cart already exists
         // increase quantity if found
         cartDB.setQuantity(cartDB.getQuantity() <= 0 ? cart.getQuantity() : cartDB.getQuantity() + cart.getQuantity());
+        logger.debug("Adding to cart book " + cartDB.getIsbn() + " for user " + cartDB.getEmail());
         return cartRepository.save(cartDB);
     }
 
     // update a Cart
-    @PutMapping("/carts")
+    @PutMapping("")
     public Cart updateCart(@RequestBody Cart cart) {
+        simulateHardWork();
+        simulateCrash();
         this.verifyClient(cart.getEmail());
         this.verifyBook(cart.getIsbn());
         Cart cartByEmailIsbn = cartRepository.findByEmailAndIsbn(cart.getEmail(), cart.getIsbn());
@@ -89,7 +100,7 @@ public class CartController {
     }
 
     // remove specified quantity
-    @DeleteMapping("/carts")
+    @DeleteMapping("")
     public Cart reduceCart(@RequestBody Cart cart) {
         this.verifyClient(cart.getEmail());
         this.verifyBook(cart.getIsbn());
@@ -107,7 +118,7 @@ public class CartController {
     }
 
     // remove all carts
-    @DeleteMapping("/carts/delete-all")
+    @DeleteMapping("/delete-all")
     public void deteteAllCarts() {
         cartRepository.deleteAll();
     }
@@ -129,5 +140,10 @@ public class CartController {
         }
         Book[] books = bookRepository.getAllBooks();
         logger.debug(books.toString());
+    }
+
+    @Override
+    public ConfigRepository getConfigRepository() {
+        return configRepository;
     }
 }
