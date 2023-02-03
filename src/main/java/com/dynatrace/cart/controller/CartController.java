@@ -44,7 +44,9 @@ public class CartController extends HardworkingController {
         simulateCrash();
         Optional<Cart> cart = cartRepository.findById(id);
         if (cart.isEmpty()) {
-            throw new ResourceNotFoundException("Cart not found");
+            ResourceNotFoundException ex = new ResourceNotFoundException("Cart not found");
+            logger.error(ex.getMessage());
+            throw ex;
         }
         return cart.get();
     }
@@ -93,7 +95,9 @@ public class CartController extends HardworkingController {
         Cart cartByEmailIsbn = cartRepository.findByEmailAndIsbn(cart.getEmail(), cart.getIsbn());
 
         if (null == cartByEmailIsbn) {
-            throw new BadRequestException("You can change only quantity");
+            BadRequestException ex = new BadRequestException("You can change only quantity");
+            logger.error(ex.getMessage());
+            throw ex;
         }
         cart.setId(cartByEmailIsbn.getId());
         return cartRepository.save(cart);
@@ -106,7 +110,9 @@ public class CartController extends HardworkingController {
         this.verifyBook(cart.getIsbn());
         Cart cartByEmailIsbn = cartRepository.findByEmailAndIsbn(cart.getEmail(), cart.getIsbn());
         if (null == cartByEmailIsbn) {
-            throw new ResourceNotFoundException("Cart not found");
+            ResourceNotFoundException ex = new ResourceNotFoundException("Cart not found");
+            logger.error(ex.getMessage());
+            throw ex;
         }
         if (cart.getQuantity() >= cartByEmailIsbn.getQuantity()) {
             // deleting the cart
@@ -127,7 +133,9 @@ public class CartController extends HardworkingController {
     private void verifyClient(String email) {
         Client client = clientRepository.getClientByEmail(email);
         if (null == client) {
-            throw new ResourceNotFoundException("Client is not found by email " + email);
+            ResourceNotFoundException ex = new ResourceNotFoundException("Client is not found by email " + email);
+            logger.error(ex.getMessage());
+            throw ex;
         }
         Client[] clients = clientRepository.getAllClients();
         logger.debug(clients.toString());
@@ -136,7 +144,9 @@ public class CartController extends HardworkingController {
     private void verifyBook(String isbn) {
         Book book = bookRepository.getBookByISBN(isbn);
         if (null == book) {
-            throw new ResourceNotFoundException("Book not found by isbn " + isbn);
+            ResourceNotFoundException ex = new ResourceNotFoundException("Book not found by isbn " + isbn);
+            logger.error(ex.getMessage());
+            throw ex;
         }
         Book[] books = bookRepository.getAllBooks();
         logger.debug(books.toString());
