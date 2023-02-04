@@ -2,6 +2,8 @@ package com.dynatrace.cart.repository;
 
 import com.dynatrace.cart.exception.ResourceNotFoundException;
 import com.dynatrace.cart.model.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
@@ -11,6 +13,7 @@ public class ClientRepository {
     @Value("${http.service.clients}")
     private String clientBaseURL;
     private RestTemplate restTemplate;
+    Logger logger = LoggerFactory.getLogger(ClientRepository.class);
 
     public ClientRepository() {
         restTemplate = new RestTemplate();
@@ -22,10 +25,12 @@ public class ClientRepository {
                 "/find" +
                 "?email=" +
                 email;
-
+        logger.info("Getting client " + email);
         Client client = restTemplate.getForObject(urlBuilder, Client.class);
         if (null == client) {
-            throw new ResourceNotFoundException("Client not found by email: " + email);
+            ResourceNotFoundException ex = new ResourceNotFoundException("Client not found by email: " + email);
+            logger.error(ex.getMessage());
+            throw ex;
         }
         return client;
     }
