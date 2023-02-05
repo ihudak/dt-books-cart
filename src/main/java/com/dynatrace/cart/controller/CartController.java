@@ -29,8 +29,8 @@ public class CartController extends HardworkingController {
     @Autowired
     private BookRepository bookRepository;
     @Autowired
-    ConfigRepository configRepository;
-    Logger logger = LoggerFactory.getLogger(CartController.class);
+    private ConfigRepository configRepository;
+    private Logger logger = LoggerFactory.getLogger(CartController.class);
 
     // get all Carts
     @GetMapping("")

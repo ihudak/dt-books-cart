@@ -13,7 +13,7 @@ public class ClientRepository {
     @Value("${http.service.clients}")
     private String clientBaseURL;
     private RestTemplate restTemplate;
-    Logger logger = LoggerFactory.getLogger(ClientRepository.class);
+    private Logger logger = LoggerFactory.getLogger(ClientRepository.class);
 
     public ClientRepository() {
         restTemplate = new RestTemplate();
