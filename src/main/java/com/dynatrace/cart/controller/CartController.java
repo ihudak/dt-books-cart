@@ -126,7 +126,7 @@ public class CartController extends HardworkingController {
     // remove all carts
     @DeleteMapping("/delete-all")
     public void deteteAllCarts() {
-        cartRepository.deleteAll();
+        cartRepository.truncateTable();
     }
 
 
